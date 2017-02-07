@@ -219,7 +219,7 @@ VERSION_ID="12"
 	`NAME="CentOS Linux"
 ID="centos"
 `,
-	"unknown",
+	"",
 	"could not determine series",
 },
 }

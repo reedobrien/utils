@@ -138,6 +138,7 @@ var windowsVersionMatchOrder = []string{
 	"Windows 8.1",
 	"Windows 8",
 	"Windows 10",
+	Unknown,
 }
 
 // windowsVersions is a mapping consisting of the output from

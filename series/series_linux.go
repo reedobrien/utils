@@ -47,7 +47,7 @@ func getValue(from map[string]string, val string) (string, error) {
 			return serie, nil
 		}
 	}
-	return "unknown", errors.New("could not determine series")
+	return "", errors.New("could not determine series")
 }
 
 // ReleaseVersion looks for the value of VERSION_ID in the content of

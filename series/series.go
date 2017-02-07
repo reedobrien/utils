@@ -11,12 +11,12 @@ import (
 	"sync"
 
 	"github.com/juju/errors"
-	"github.com/juju/utils/os"
 )
 
 const (
 	genericLinuxSeries  = "genericlinux"
 	genericLinuxVersion = "genericlinux"
+	Unknown             = "unknown"
 )
 
 var (
@@ -52,16 +52,6 @@ func mustHostSeries() string {
 	return series
 }
 
-// MustOSFromSeries will panic if the series represents an "unknown"
-// operating system
-func MustOSFromSeries(series string) os.OSType {
-	operatingSystem, err := GetOSFromSeries(series)
-	if err != nil {
-		panic("osVersion reported an error: " + err.Error())
-	}
-	return operatingSystem
-}
-
 // kernelToMajor takes a dotted version and returns just the Major portion
 func kernelToMajor(getKernelVersion func() (string, error)) (int, error) {
 	fullVersion, err := getKernelVersion()
@@ -77,12 +67,15 @@ func kernelToMajor(getKernelVersion func() (string, error)) (int, error) {
 }
 
 func macOSXSeriesFromKernelVersion(getKernelVersion func() (string, error)) (string, error) {
+	// If getKernelVersion which is a syscall on osx fails, we should
+	// return that error.
 	majorVersion, err := kernelToMajor(getKernelVersion)
 	if err != nil {
 		logger.Infof("unable to determine OS version: %v", err)
-		return "unknown", err
+		return "", err
 	}
-	return macOSXSeriesFromMajorVersion(majorVersion)
+
+	return macOSXSeriesFromMajorVersion(majorVersion), nil
 }
 
 // TODO(jam): 2014-05-06 https://launchpad.net/bugs/1316593
@@ -102,15 +95,13 @@ var macOSXSeries = map[int]string{
 	10: "snowleopard",
 	9:  "leopard",
 	8:  "tiger",
-	7:  "panther",
-	6:  "jaguar",
-	5:  "puma",
+	-1: Unknown,
 }
 
-func macOSXSeriesFromMajorVersion(majorVersion int) (string, error) {
+func macOSXSeriesFromMajorVersion(majorVersion int) string {
 	series, ok := macOSXSeries[majorVersion]
 	if !ok {
-		return "unknown", errors.Errorf("unknown series %q", series)
+		return Unknown
 	}
-	return series, nil
+	return series
 }

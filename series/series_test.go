@@ -71,11 +71,9 @@ func (*kernelVersionSuite) TestMacOSXSeriesFromKernelVersion(c *gc.C) {
 }
 
 func (*kernelVersionSuite) TestMacOSXSeriesFromKernelVersionError(c *gc.C) {
-	// We suppress the actual error in favor of returning "unknown", but we
-	// do log the error
 	series, err := series.MacOSXSeriesFromKernelVersion(sysctlError)
 	c.Assert(err, gc.ErrorMatches, "no such syscall")
-	c.Assert(series, gc.Equals, "unknown")
+	c.Assert(series, gc.Equals, "")
 	c.Check(c.GetTestLog(), gc.Matches, ".* juju.juju.series unable to determine OS version: no such syscall\n")
 }
 
@@ -83,23 +81,17 @@ func (*kernelVersionSuite) TestMacOSXSeries(c *gc.C) {
 	tests := []struct {
 		version int
 		series  string
-		err     string
 	}{
 		{version: 13, series: "mavericks"},
 		{version: 12, series: "mountainlion"},
 		{version: 14, series: "yosemite"},
 		{version: 15, series: "elcapitan"},
 		{version: 16, series: "sierra"},
-		{version: 4, series: "unknown", err: `unknown series ""`},
-		{version: 0, series: "unknown", err: `unknown series ""`},
+		{version: 4, series: series.Unknown},
+		{version: 0, series: series.Unknown},
 	}
 	for _, test := range tests {
-		series, err := series.MacOSXSeriesFromMajorVersion(test.version)
-		if test.err != "" {
-			c.Assert(err, gc.ErrorMatches, test.err)
-		} else {
-			c.Assert(err, jc.ErrorIsNil)
-		}
+		series := series.MacOSXSeriesFromMajorVersion(test.version)
 		c.Check(series, gc.Equals, test.series)
 	}
 }

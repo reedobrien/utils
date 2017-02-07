@@ -39,14 +39,14 @@ func getVersionFromRegistry() (string, error) {
 func readSeries() (string, error) {
 	ver, err := getVersionFromRegistry()
 	if err != nil {
-		return "unknown", errors.Trace(err)
+		return "", errors.Trace(err)
 	}
 
 	var lookAt = windowsVersions
 
 	isNano, err := isWindowsNano()
 	if err != nil && os.IsNotExist(err) {
-		return "unknown", errors.Trace(err)
+		return "", errors.Trace(err)
 	}
 	if isNano {
 		lookAt = windowsNanoVersions
@@ -59,7 +59,7 @@ func readSeries() (string, error) {
 			}
 		}
 	}
-	return "unknown", errors.Errorf("unknown series %q", ver)
+	return Unknown, nil
 }
 
 func isWindowsNano() (bool, error) {
